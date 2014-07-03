@@ -1,7 +1,8 @@
 #include "WHT.h"
 #include "ParticleFilter.h"
 
- 
+
+
 void calculateHistogram(IplImage* img, _histogram* histogram)
 {
 	IplImage* channel = cvCreateImage( cvGetSize(img), 8, 1 );
@@ -156,7 +157,8 @@ void update(_particles* database, _track* track, IplImage* HSVImg)
 
 void resample(_particles* database, _track* track)
 {
-	int x = 0;
+	//cout<<"Resample"<<"\n";
+    int x = 0;
 	int y = 0;
 	//loop through all the particles
 	for(int i=0;i<Nmax;i++)
@@ -191,10 +193,6 @@ void resample(_particles* database, _track* track)
 		_particles* new_particles = (_particles*)malloc( Nmax * sizeof( particles ) );
 		
 		resampleparticles(database,new_particles,Nmax);
-
-		free(database);
-
-		_particles* database = (_particles*)malloc( Nmax * sizeof( particles ) );
 
 		for(int i=0;i<Nmax;i++)
 		{

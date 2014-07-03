@@ -15,43 +15,32 @@ static void on_mouse(int event, int x, int y, int flags, void *param)
 	sel_y = y;
 
 	selectionflag = false;
-	IplImage* selectionImage = cvCloneImage(videoFrame);
-    switch(event) {
+	 switch(event) {
         /* left button down */
         case CV_EVENT_LBUTTONDOWN:
-            cvRectangle(selectionImage,
-                        cvPoint(x - 10, y - 10),
-                        cvPoint(x + 10, y + 10),
-                        cvScalar(0, 0, 255, 0), 2, 8, 0);
-            cvShowImage("SelectionWindow", selectionImage);
-			selectionflag = true;
+    		selectionflag = true;
+            cout<<"Selected x "<<x<<" y "<<y<<"\n";
             break;
        
         /* mouse move */
         case CV_EVENT_MOUSEMOVE:
-			cvRectangle(selectionImage,
-                        cvPoint(x - 10, y - 10),
-                        cvPoint(x + 10, y + 10),
-                        cvScalar(0, 0, 255, 0), 2, 8, 0);
-			cvShowImage("SelectionWindow", selectionImage);
-			cvReleaseImage(&selectionImage);
-            break; 
+             //do nothing
+	        break;
     }
 }
 
-void selectObject(CvCapture* capture, _track* track, bool flag)
+void selectObject(InputArray img, _track* track, bool flag)
 {
 	selectionflag = flag;
-	while(selectionflag==false)
-	{
-		videoFrame = cvQueryFrame(capture);
-		cvNamedWindow( "SelectionWindow", 1 );
-		cvShowImage( "SelectionWindow",videoFrame);
-		cvSetMouseCallback( "SelectionWindow", on_mouse);
-		cvWaitKey(10);
-	}
+	
+		namedWindow( "SelectionWindow", 1 );
+		imshow( "SelectionWindow",img);
+		setMouseCallback( "SelectionWindow", on_mouse);
+        while(!selectionflag)
+            waitKey(10);
+	
 
-	track->capture = capture;
+	//track->capture = capture;
 	track->x = sel_x;
 	track->y = sel_y;	
 	track->scale = 20;

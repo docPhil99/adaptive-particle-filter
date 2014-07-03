@@ -3,19 +3,20 @@
 
  
 
-int processFrame(IplImage* img, _track* track, _particles* database, bool firstrun, gsl_rng* rng)
+int processFrame(InputArray Mimg, _track* track, _particles* database, bool firstrun, gsl_rng* rng)
 {
 	//convert RGB to HSV
-	IplImage* HSVImg = cvCreateImage( cvGetSize(img), img->depth, 3 );
-	cvCvtColor(img,HSVImg,CV_BGR2HSV);
-	
-
-
+    Mat HSV;
+	cvtColor(Mimg, HSV, CV_BGR2HSV);
+    imshow("HSV", HSV);
+    IplImage HSVIpl=HSV;
+    Mat MMimg=Mimg.getMat();
+    IplImage img=MMimg;
 
 	if(firstrun==true)
 	{
 		printf("\nTRACKING...");
-		track->refHistogram = calculateRefHistogram(HSVImg, track);
+		track->refHistogram = calculateRefHistogram(&HSVIpl, track);
 
 		//initialize particles database
 		for(int i=0;i<track->activeparticles;i++)
@@ -29,15 +30,16 @@ int processFrame(IplImage* img, _track* track, _particles* database, bool firstr
 	else
 	{
 		//particle filter steps
-		predict(database, track, img, rng);
-		update(database, track, HSVImg);
+		predict(database, track, &img, rng);
+        update(database, track, &HSVIpl);
 		resample(database, track);
 	}
 
-	displayParticles(database, track, img);
+	displayParticles(database, track, &img);
+	
 
-	cvReleaseImage(&HSVImg);
-	return 0;
+    
+ return 0;
 }
 
 

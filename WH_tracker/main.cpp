@@ -10,65 +10,68 @@
 #include "WHT.h"
 
 
-_particles* initialize(CvCapture** capture,gsl_rng** rng)
-{
-	printf("INITIALIZING TRACKING DATABASE\n\n");
-    
-	//initialize particles
-	_particles* database = (_particles*)malloc( Nmax * sizeof( particles ) );
-	
-	printf("CONNECTING TO CAMERA(s)\n\n");
-	//initialize Captures
-	*capture = cvCaptureFromFile("http://139.184.100.71/mjpg/video.mjpg");
-	
-	gsl_rng_env_setup();
-	*rng=gsl_rng_alloc(gsl_rng_mt19937);
-    
-    
-	return database;
-}
-
 int main(int argc, const char * argv[])
 {
 
-    CvCapture* capture = NULL;
+    //load a video
+     VideoCapture cap("/Volumes/LocalDataHD/tafj0/Documents/MATLAB/Videos/pets1.avi");
+    
+    //skip some frames
+    for(int p=0;p<40;p++)
+        cap.grab();
+    
+    
 	gsl_rng* rng;
-	IplImage* img = NULL;
-	_particles* database= initialize(&capture,&rng);
+    Mat img;
+    //setup random number generator
+    gsl_rng_env_setup();
+	rng=gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set( rng, time(NULL) );
+	
+    //malloc particle database
+    _particles* database = (_particles*)malloc( Nmax * sizeof( particles ) );
+	
+	//malloc track
 	_track* track =(_track*)malloc( 1 * sizeof( t ) );
-	gsl_rng_set( rng, time(NULL) );
-	//selectObject(capture, track, false);
+    track->selection=false;
+    
 	bool firstRun = true;
 	int key = 0;
-	while(1)
+    long frame=0;
+	while(1)  //main loop
 	{
-		if(track->selection==true)
+        cout<<frame<<"\n";
+        frame++;
+		if(track->selection==true) //an object has been selected by the user, track it
 		{
-			img = grabFrame(track, img);
-			int x = processFrame(img, track, database, firstRun, rng);
+			cap>>img;
+          	int x = processFrame(img, track, database, firstRun, rng);
 			firstRun = false;
 		}
-		else
+		else   //no object has been selected so select on
 		{
-			selectObject(capture,track,false);
+            cap>>img;
+			selectObject(img,track,false);
 		}
         
 		key=cvWaitKey(10);
-		if(key == 32)
+		if(key == 32)   //press space key
 			break;
-		else if(key == 27)
+		else if(key == 114)   //press 'r'r key to reset track
 		{
-			printf("\n\nRESET\n");
+			cout<<"\n\nRESET\n";
+            cout.flush();
 			cvDestroyWindow("Particles");
-			free(database);
+			free(database);  // this releasing of track and database causes a memory hole and it needs to be removed.
 			free(track);
-			_particles* database = (_particles*)malloc( Nmax * sizeof( particles ) );
-			_track* track =(_track*)malloc( 1 * sizeof( t ) );
+			database = (_particles*)malloc( Nmax * sizeof( particles ) );
+			track =(_track*)malloc( 1 * sizeof( t ) );
 			firstRun = true;
 			track->selection = false;
 		}
 		
 	}
+    destroyAllWindows();
     return 0;
 }
 

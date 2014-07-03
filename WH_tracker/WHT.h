@@ -62,20 +62,16 @@ typedef struct _track
 {
 	int x;
 	int y;
-	CvCapture* capture;
+//	CvCapture* capture;
 	bool selection;
 	_histogram* refHistogram;
 	int activeparticles;
 	int scale;
+   // MatND refHist;
 }t;
 
 
-
-
-//void add(int,int);
-void selectObject(CvCapture*,_track*,bool);
-void updateCameraInfo(_track*);
-IplImage* grabFrame(_track*,IplImage*);
-int processFrame(IplImage*, _track*, _particles*, bool, gsl_rng*);
+void selectObject(InputArray img,_track*,bool);
+int processFrame(InputArray img, _track*, _particles*, bool, gsl_rng*);
 
 #endif
